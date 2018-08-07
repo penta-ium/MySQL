@@ -74,11 +74,39 @@ InnoDB引擎通过LSN（log sequence number）来标识版本，每个lsn有8个
 ###Insert Buffer
 为了提高辅助索引，指非唯一的辅助索引，的插入顺序的一种优化策略。
 
-对于非聚集索引的插入或者更新操作，不是每一次直接插入到索引页中，而是先判断插入的非聚集索引是否在缓冲池，
+对于非聚集索引的插入或者更新操作，不是每一次直接插入到索引页中，而是先判断插入的非聚集索引是否在缓冲池，如果在则直接插入，如果不在，则放到一个Insert Buffer对象中。
+
+再以一定频率和特定的情况，进行Insert Buffer和辅助索引叶子节点的合并（merge），这种情况通常会将多个插入合并到一个操作中（因为多个插入发生在同一个索引页中）。
+
+使用条件：
+
+1、索引是辅助索引
+
+2、索引不唯一
+
 ###Change Buffer
 ###Insert Buffer的实现
+Insert Buffer的实现是一颗B+树，非叶子节点为（spaceId， pageOffset），叶子节点为（spaceId，pageOffset,...,具体的数据）。
+
+需要一种特殊的页来记录辅助索引的页的可用空间，就是Insert Buffer Bitmap，保证merge操作能够成功。
 ##2.6.2 两次写
-Double Write
+Insert Buffer带来的是性能上的提升，那么Double Write带来的是数据页的可靠性。
+
+![双写](./png/双写.jpg)
+
+当一系列的机制触发缓冲池中的脏页刷新到数据文件的时候，并不直接写磁盘，而是：
+
+①通过memcpy把缓冲池中的脏页复制到内存中的double write buffer
+
+②然后通过double write buffer分两次、每次1M地顺序写入位于共享表空间的物理磁盘上，然后fsync；（这个过程是顺序写，速度很快）
+
+③完成对double write的双写后，再把脏页写入到实际的数据文件中
+
+**以上步骤如果深究，第一步应该为重做日志写入log buffer，然后log buffer写入redo log**
+
+innodb_dblwr_pages_written/innodb_dblwr_writes：每次写1M的double write空间写入的page个数，可以用来评估系统写入是否繁忙。
+
+double write一共写了 61932183个页，一共写了15237891次，从这组数据我们可以分析，之前讲过在开启double write后，每次脏页刷新必须要先写double write，而double write存在于磁盘上的是两个连续的区，每个区由连续的页组成，一般情况下一个区最多有64个页，所以一次IO写入应该可以最多写64个页。而根据以上我这个系统Innodb_dblwr_pages_written与Innodb_dblwr_writes的比例来看，一次大概在4个页左右，远远还没到64，所以从这个角度也可以看出，系统写入压力并不高。
 ##2.6.3 自适应哈希索引
 Adaptive Hash Index
 ##2.6.4 异步IO
