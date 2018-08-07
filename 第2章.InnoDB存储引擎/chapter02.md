@@ -11,6 +11,9 @@ write、read、insert buffer、log thread四种。
 ##内存
 ###缓冲池
 缓冲池中存储的数据页类型有：索引页、数据页、undo页、插入缓冲（insert buffer）、自适应哈希（adaptive hash index）、索信息、数据字典信息等。
+###LRU、Free、Flush List
+####LRU
+在传统的LRU算法基础上，增加了midpoint位置，读取到的页，虽然是最新访问的页，但并不是直接放入到LRU的首部，而是放入LRU列表的midpoint位置。默认配置为5/8左右。
 #Checkpoint技术
 #InnoDB关键特性
 gj
