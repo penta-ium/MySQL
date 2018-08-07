@@ -1,5 +1,6 @@
-#InnoDB体系架构
-##后台线程
+#2.3 InnoDB体系架构
+![体系架构](./png/体系架构.png)
+##2.3.1 后台线程
 ###Master Thread
 负责缓冲池中的数据异步刷新到磁盘，保证数据一致性，包括脏页的刷新、合并插入缓冲、UNDO页的回收等。
 ###IO Thread
@@ -8,7 +9,8 @@ write、read、insert buffer、log thread四种。
 从Master线程中独立出来，用于合并已分配且使用的undo页。
 ###Page Clean Thread
 从Master线程中独立出来，用于脏页的刷新。
-##内存
+##2.3.2 内存
+![内存数据对象](./png/内存数据对象.png)
 ###缓冲池
 缓冲池中存储的数据页类型有：索引页、数据页、undo页、插入缓冲（insert buffer）、自适应哈希（adaptive hash index）、索信息、数据字典信息等。
 ###LRU、Free、Flush List
@@ -37,23 +39,52 @@ InnoDB引擎首先把重做日志信息放入到这个缓冲区，然后按照�
 
 3、当重做日志缓冲剩余空间小于1/2时，...。
 ###额外内存池
-#Checkpoint技术
+
+
+#2.4 Checkpoint技术
 缓冲池的目的是协调CPU速度与磁盘速度的鸿沟。因此，页的操作首先在缓冲池完成，一条DML语句改变了页中的记录，那么此时页是脏的，即：缓冲池中的页的版本比磁盘的要新。数据库需要将新版本的页从缓冲池刷新到磁盘。
 
 WAL，Write Ahead Log策略，在事务提交时，先写事务日志，再修改页。满足事务的持久性（Durability）。
 
-Checkpoint技术解决的问题：
-
-##缩短数据库的恢复时间；
+##Checkpoint技术解决的问题
+###缩短数据库的恢复时间；
 数据库发生宕机恢复时，不需要重做所有的日志，因为checkpoint点之前的页都已经刷回磁盘。只需要对checkpoint点之后的重做日志进行恢复。
-##缓冲池不够用时，将脏页刷到磁盘；
+###缓冲池不够用时，将脏页刷到磁盘；
 缓冲池不够用时，根据LRU算法溢出最近最少使用的页，如果此页为脏页，则强制进行checkpoint，把脏页刷回磁盘。
-##重做日志不可用时，刷新脏页；
+###重做日志不可用时，刷新脏页；
 重做日志是两个可以重用的文件，大小并不是无限增大。
 ##LSN
 InnoDB引擎通过LSN（log sequence number）来标识版本，每个lsn有8个字节，共64位。
 
 页有lsn、redo log有lsn、checkpoint有lsn。
 
-#InnoDB关键特性
+##Checkpoint种类
+###Sharp Checkpoint
+关闭时将所有的脏页刷回磁盘。
+###Fuzzy Checkpoint
+只刷回一部分脏页，不是刷新所有的脏页。
+####Master Thread Checkpoint
+####Flush_LRU_List Checkpoint
+####Sync/Async Checkpoint
+####Dirty Page Too Much Checkpoint
 
+
+#2.6 InnoDB关键特性
+##2.6.1 插入缓冲
+###Insert Buffer
+为了提高辅助索引，指非唯一的辅助索引，的插入顺序的一种优化策略。
+
+对于非聚集索引的插入或者更新操作，不是每一次直接插入到索引页中，而是先判断插入的非聚集索引是否在缓冲池，
+###Change Buffer
+###Insert Buffer的实现
+##2.6.2 两次写
+Double Write
+##2.6.3 自适应哈希索引
+Adaptive Hash Index
+##2.6.4 异步IO
+Async IO
+##2.6.5 刷新邻接页
+Flush Neighbor Page
+
+
+#2.7 启动、关闭与恢复
