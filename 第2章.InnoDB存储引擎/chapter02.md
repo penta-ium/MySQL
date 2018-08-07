@@ -32,12 +32,9 @@ InnoDB引擎首先把重做日志信息放入到这个缓冲区，然后按照�
 重做日志缓冲不需要设置的很大，因为一般情况下每1秒钟都会将重做日志缓冲刷新到日志文件。
 
 重做日志缓冲在三种情况下回刷新到重做日志文件：
-
-1、Master Thread每一秒都将重做日志缓冲刷新到重做日志文件。
-
-2、每个事务提交时会将...。
-
-3、当重做日志缓冲剩余空间小于1/2时，...。
+ >- Master Thread每一秒都将重做日志缓冲刷新到重做日志文件。 
+ >- 个事务提交时会将...。 
+ >- 重做日志缓冲剩余空间小于1/2时，...。
 ###额外内存池
 
 
@@ -63,10 +60,11 @@ InnoDB引擎通过LSN（log sequence number）来标识版本，每个lsn有8个
 关闭时将所有的脏页刷回磁盘。
 ###Fuzzy Checkpoint
 只刷回一部分脏页，不是刷新所有的脏页。
-####Master Thread Checkpoint
-####Flush_LRU_List Checkpoint
-####Sync/Async Checkpoint
-####Dirty Page Too Much Checkpoint
+
+ >- Master Thread Checkpoint
+ >- Flush_LRU_List Checkpoint
+ >- Sync/Async Checkpoint
+ >- Dirty Page Too Much Checkpoint
 
 
 #2.6 InnoDB关键特性
@@ -96,11 +94,9 @@ Insert Buffer带来的是性能上的提升，那么Double Write带来的是数�
 
 当一系列的机制触发缓冲池中的脏页刷新到数据文件的时候，并不直接写磁盘，而是：
 
-①通过memcpy把缓冲池中的脏页复制到内存中的double write buffer
-
-②然后通过double write buffer分两次、每次1M地顺序写入位于共享表空间的物理磁盘上，然后fsync；（这个过程是顺序写，速度很快）
-
-③完成对double write的双写后，再把脏页写入到实际的数据文件中
+ > 0. 通过memcpy把缓冲池中的脏页复制到内存中的double write buffer 
+ > 0. 然后通过double write buffer分两次、每次1M地顺序写入位于共享表空间的物理磁盘上，然后fsync；（这个过程是顺序写，速度很快） 
+ > 0. 完成对double write的双写后，再把脏页写入到实际的数据文件中
 
 **以上步骤如果深究，第一步应该为重做日志写入log buffer，然后log buffer写入redo log**
 
