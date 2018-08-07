@@ -13,3 +13,5 @@ write、read、insert buffer、log thread四种。
 缓冲池中存储的数据页类型有：索引页、数据页、undo页、插入缓冲（insert buffer）、自适应哈希（adaptive hash index）、索信息、数据字典信息等。
 #Checkpoint技术
 #InnoDB关键特性
+
+
