@@ -105,6 +105,10 @@ innodb_dblwr_pages_written/innodb_dblwr_writes：每次写1M的double write空�
 double write一共写了 61932183个页，一共写了15237891次，从这组数据我们可以分析，之前讲过在开启double write后，每次脏页刷新必须要先写double write，而double write存在于磁盘上的是两个连续的区，每个区由连续的页组成，一般情况下一个区最多有64个页，所以一次IO写入应该可以最多写64个页。而根据以上我这个系统Innodb_dblwr_pages_written与Innodb_dblwr_writes的比例来看，一次大概在4个页左右，远远还没到64，所以从这个角度也可以看出，系统写入压力并不高。
 ##2.6.3 自适应哈希索引
 Adaptive Hash Index
+
+InnoDB引擎自动地根据访问频率和模式，通过缓冲池中的B+树，为热点页构造哈希索引。
+
+哈希索引只能用于等值的查询，即 where col = 'XXX'
 ##2.6.4 异步IO
 Async IO
 ##2.6.5 刷新邻接页
