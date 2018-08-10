@@ -36,9 +36,22 @@ UserRecord的类型分为四种：
 
 #5.5 Cardinality
 
-索引中唯一值的数目的估计值。
+索引中唯一值(不重复记录)的数目的估计值。
 
 ANALYSE TABLE 可以更新Cardinality的值，有助于优化器做出正确的选择，explain的时候。
 
 一般情况下，访问表中很少一部分数据时，B+树索引才有意义。
+
+Cardinality/n_rows_in_table ≈ 1，应该尽可能接近1。
+
+InnoDB内部更新Cardinality的策略：
+1. 表中1/16的数据已经发生变化
+1. stat_modified_counter >= 20 0000 0000
+
+Cardinality是随机选8个叶子结点page进行统计。
+
+#5.6 B+树索引的使用
+
+联合索引idx_a_b(a,b)，单独使用b查询不走索引，因为b在索引树上是无序的。
+
 
