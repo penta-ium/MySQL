@@ -89,6 +89,40 @@ create table s_orderform(
 而不是一致性非锁定读，为了防止一致性出错。如果这时候主表对应行已经有了X锁，那么子表的操作会被阻塞。
 
 #6.4 锁的算法
+##6.4.1 行锁的三种算法
+>Record Lock:单个行记录的锁
+> 
+>record lock总是去锁索引，如果没有任何索引，则会去通过隐式主键来锁定。
+>
+>Gap Lock:锁定一个范围，但不包括记录本身,Gap锁的目的是防止多个事务把数据插入到同一个范围，引起幻读问题。
+>
+![GapLock示意](./png/GapLock.png)
+
+在可能插入辅助索引b = 3的地方都给锁住！！！
+
+>Next-Key Lock:Gap Lock + Record Lock，锁定一个范围，并且锁定记录本身
+>
+>在查询的索引包含唯一索引时，Next-Key Locking会降级为Record Lock!!!降级仅发生在查询的列是唯一索引的情况！！！
+
+##6.4.2 解决Phantom问题
+一致性非锁定读的多版本并发控制的目的是提高读的并发量，读不会被S、X锁阻塞；
+
+Next-Key Locking技术的目的是解决了幻读问题。
+
+Repeatable Read级别下：默认使用Next-Key Locking技术；
+
+Read Commited级别下：默认是用Record Lock；
+
+使用Next-key Locking技术实现业务层面的唯一性检查：
+create table z (a int, b int, primary key (a), key (b))engine = innodb;
+
+SELECT * FROM TABLE WHERE COL = XXX LOCK IN SHARE MODE;
+if none result
+    insert into ... values
+    
+#6.5 锁问题
+##6.5.4 脏读
+
 
 
 
