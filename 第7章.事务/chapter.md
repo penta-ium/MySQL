@@ -56,9 +56,8 @@ checkpoint的位置: 在第一个redo log文件头部进行记录。
 
 Log sequence number（LSN1）：当前系统LSN最大值，新的事务日志LSN将在此基础上生成（LSN1+新日志的大小）；
 
-Log flushed up to（LSN2）：当前已经写入日志文件的LSN；
+Log flushed up to（LSN2）：当前已经写入重做日志文件的LSN；
 
 Oldest modified data log（LSN3）：当前最旧的脏页数据对应的LSN，写Checkpoint的时候直接将此LSN写入到日志文件；
 
 Last checkpoint at（LSN4）：当前已经写入Checkpoint的LSN；
-
