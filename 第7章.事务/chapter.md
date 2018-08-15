@@ -113,13 +113,23 @@ InnoDB1.2之后的版本;
 ![BLGC](./png/BLGC.png)
 ###Flush
 leader将每个事务的二进制日志写入内存；
-innodb写redo log也是这一步骤!!!
 ###Sync:
 leader将组内的binlog写入到文件并根据sync_binlog刷盘
 ###Commit:
 leader根据顺序调用innodb的提交操作
 
 史上最全Group Commit
+
+> WAL机制 (Write Ahead Log)定义:
+WAL指的是对数据文件进行修改前，必须将修改先记录日志。MySQL为了保证ACID中的一致性和持久性，使用了WAL。
+>Redo log的作用:
+Redo log就是一种WAL的应用。当数据库忽然掉电，再重新启动时，MySQL可以通过Redo log还原数据。也就是说，每次事务提交时，不用同步刷新磁盘数据文件，只需要同步刷新Redo log就足够了。相比写数据文件时的随机IO，写Redo log时的顺序IO能够提高事务提交速度。
+>组提交的作用:
+在没有开启binlog时
+Redo log的刷盘操作将会是最终影响MySQL TPS的瓶颈所在。为了缓解这一问题，MySQL使用了组提交，将多个刷盘操作合并成一个，如果说10个事务依次排队刷盘的时间成本是10，那么将这10个事务一次性一起刷盘的时间成本则近似于1。
+当开启binlog时
+为了保证Redo log和binlog的数据一致性，MySQL使用了二阶段提交，由binlog作为事务的协调者。而 引入二阶段提交 使得binlog又成为了性能瓶颈，先前的Redo log 组提交 也成了摆设。为了再次缓解这一问题，MySQL增加了binlog的组提交，目的同样是将binlog的多个刷盘操作合并成一个，结合Redo log本身已经实现的 组提交，分为三个阶段(Flush 阶段、Sync 阶段、Commit 阶段)完成binlog 组提交，最大化每次刷盘的收益，弱化磁盘瓶颈，提高性能。
+
 ![渡口](./png/Boat.jpg)
 
 在MySQL中每个阶段都有一个队列，每个队列都有一把锁保护，第一个进入队列的事务会成为leader，leader领导所在队列的所有事务，全权负责整队的操作，完成后通知队内其他事务操作结束。
