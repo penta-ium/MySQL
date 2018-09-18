@@ -91,6 +91,9 @@ DELETE FROM T WHERE a = 1;
 真正的处理被延迟到了Purge中。
 
 ##Group Commit
+详见XA-2PC&GroupCommit
+
+
 开启group commit的作用就是为了把多次fsync合并成一次fsync提高性能；
 > 但是InnoDB1.2之前的版本，在开启Binlog以后，会导致group commit失效（就是实际上并不会组提交fsync，还是会单个事务fsync一次）
 >
