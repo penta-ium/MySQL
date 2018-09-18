@@ -33,7 +33,7 @@ innodb_flush_log_at_trx_commit：</br>
 |XXX|Binlog|Redolog|
 |---|---|---|
 |写入时机|事务执行过程中，binlog event不断写入binlog_cache，</br>事务提交时，把cache写入文件|事务执行过程中不断写入redolog buffer，提交时写入到文件|
-![写入时机](./png/BinRedoDiff.png)
+![写入时机](png/BinRedoDiff.png)
 
 define LOG_BLOCK_CHECKPOINT_NO 8 /* 4 lower bytes of the value of
 
@@ -43,7 +43,7 @@ define LOG_BLOCK_CHECKPOINT_NO 8 /* 4 lower bytes of the value of
 checkpoint的位置: 在第一个redo log文件头部进行记录。
 
 页的版本--FIL_PAGE_LSN，page_header有以上结构，更改页的记录时的lsn。
-![LSN](./png/LSN.gif)
+![LSN](png/LSN.gif)
 创建阶段：事务创建一条日志；
 
 日志刷盘：日志写入到磁盘上的日志文件；
@@ -62,7 +62,7 @@ Oldest modified data log（LSN3）：当前最旧的脏页数据对应的LSN，�
 
 Last checkpoint at（LSN4）：当前已经写入Checkpoint的LSN；
 
-![根据RedoLog恢复](./png/redologrecovery.png)
+![根据RedoLog恢复](png/redologrecovery.png)
 Checkpoint表示的是已经刷新到磁盘上去的LSN。
 
 上图中“当数据库在checkpoint的LSN为10000时发生宕机”，意思是宕机的时刻redo log中记录的CKP为10000。
@@ -110,7 +110,7 @@ InnoDB1.2之前的版本
 
 InnoDB1.2之后的版本;
 可以更好的兼容MySQL的Binary Log Group Commit：
-![BLGC](./png/BLGC.png)
+![BLGC](png/BLGC.png)
 ###Flush
 leader将每个事务的二进制日志写入内存；
 ###Sync:
@@ -130,7 +130,7 @@ Redo log的刷盘操作将会是最终影响MySQL TPS的瓶颈所在。为了缓
 当开启binlog时
 为了保证Redo log和binlog的数据一致性，MySQL使用了二阶段提交，由binlog作为事务的协调者。而 引入二阶段提交 使得binlog又成为了性能瓶颈，先前的Redo log 组提交 也成了摆设。为了再次缓解这一问题，MySQL增加了binlog的组提交，目的同样是将binlog的多个刷盘操作合并成一个，结合Redo log本身已经实现的 组提交，分为三个阶段(Flush 阶段、Sync 阶段、Commit 阶段)完成binlog 组提交，最大化每次刷盘的收益，弱化磁盘瓶颈，提高性能。
 
-![渡口](./png/Boat.jpg)
+![渡口](png/Boat.jpg)
 
 在MySQL中每个阶段都有一个队列，每个队列都有一把锁保护，第一个进入队列的事务会成为leader，leader领导所在队列的所有事务，全权负责整队的操作，完成后通知队内其他事务操作结束。
 Flush 阶段 (图中第一个渡口)

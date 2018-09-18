@@ -71,14 +71,14 @@ Row + RC  有更好的性能。
 可以配置每个表一个单独的表空间文件：innodb_file_per_table，单独的表空间文件${table_name}.ibd文件，只存放数据页、索引页、插入缓冲位图（insert buffer bitmap）。
 
 ## 重做日志文件
-![重做日志条目结构](./png/重做日志条目结构.png)
+![重做日志条目结构](png/重做日志条目结构.png)
 1. redo_log_type:       重做日志类型
 2. space:               表空间id
 3. page_no:             页的偏移量
 4. redo_log_body:       重做日志条目的数据部分
 ib_logfile0和ib_logfile1。
 写入重做日志文件的操作不是直接写，而是先写入一个重做日志缓冲（redo log buffer），然后按照一定的顺序写入重做日志文件。
-![重做日志写入过程](./png/重做日志写入过程.png)
+![重做日志写入过程](png/重做日志写入过程.png)
 ###重做日志缓冲（redo log buffer）写入重做日志文件（redo log file）的条件：
 ####Master线程每秒把重做日志缓冲写入重做日志文件，不论事务是否提交
 ####innodb_flush_log_at_trx_commit（在commit提交时，处理重做日志的方式）：

@@ -4,7 +4,7 @@
 page level:0000 数据页
 
 page level:0001 数据页上一层的页~~
-![B+树索引](./png/B+树索引.png)
+![B+树索引](png/B+树索引.png)
 
 page 0003的page level 为0001；
 

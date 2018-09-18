@@ -96,7 +96,7 @@ create table s_orderform(
 >
 >Gap Lock:锁定一个范围，但不包括记录本身,Gap锁的目的是防止多个事务把数据插入到同一个范围，引起幻读问题。
 >
-![GapLock示意](./png/GapLock.png)
+![GapLock示意](png/GapLock.png)
 
 在可能插入辅助索引b = 3的地方都给锁住！！！
 
@@ -150,7 +150,7 @@ innodb_lock_wait_timeout：控制等待锁的时间；面向Seesion和Global，�
 发现死锁后，InnoDB会回滚其中一个事务。
 ##6.7.2 死锁的概率？？pass
 ##6.7.3 死锁的示例
-![死锁示例](./png/DeadLock.png)
+![死锁示例](png/DeadLock.png)
 
 InnoDB自动在外键上建立一个索引。
 
