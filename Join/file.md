@@ -1,4 +1,4 @@
-本文引用自InsedeMySQL微信公众号以下文章：
+本文内容参考：
 MySQL Join算法与调优白皮书（一）
 
 MySQL Join算法与调优白皮书（二）
