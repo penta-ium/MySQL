@@ -17,7 +17,9 @@ MySQL Join算法与调优白皮书（四 ）
 **Join的比较次数**，记为M。根据不同Join算法，比较次数不同<br>
 **回表的读取记录的数**，记为F。若Join的是辅助索引，可能需要回表取得最终的数据<br>
 
-MySQL的join算法采用的是Nested Loop Join算法，在这种算法下又分为几种不同的算法：<br>
+#MySQL的join算法采用的是Nested Loop Join算法。<br>
+顾名思义， Nested Loop Join 实际上就是通过驱动表的结果集作为循环的基础数据，然后一条一条的通过该结果集中的数据作为过滤条件到下一个表中查询数据，然后合并结果。如果还有第三个参与 Join，则再通过前两个表的 Join 结果集作为循环基础数据，再一次通过循环查询条件到第三个表中查询数据，如此往复。
+在这种算法下又分为几种不同的算法：<br>
 
 >##Simple Nested Loop Join
 
@@ -25,10 +27,10 @@ MySQL的join算法采用的是Nested Loop Join算法，在这种算法下又分�
 ![snlj](./png/snlj.png)
 
 ###伪代码
-    For each row r in R do<br> 
-        Foreach row s in S do<br> 
-        If r and s satisfy the join condition <br>
-            Then output the tuple<br>
+    For each row r in R do
+        Foreach row s in S do
+            If r and s satisfy the join condition 
+                Then output the tuple
            
 ###算法说明
 
@@ -39,12 +41,12 @@ MySQL的join算法采用的是Nested Loop Join算法，在这种算法下又分�
 
 ###伪代码
     For each row r in R do 
-        lookupr in S index 
+        lookup r in S index 
         if found s == r
             Then output the tuple
 
 ###算法说明
-index nested loop join满有一部分原因是因为，如果被驱动表的索引不能包含所有需要查询的数据，则需要一次fetch
+index nested loop join慢有一部分原因是因为，如果被驱动表的索引不能包含所有需要查询的数据，则需要一次fetch
 
 ![inljf](png/inljf.png)
 
@@ -76,3 +78,22 @@ Join Buffer用以缓存链接需要的列，然后以Join Buffer批量的形式�
 ![bkaj](./png/bkaj.png)
 ###伪代码
 ###算法说明
+
+#Join算法优化
+
+参考MySQL性能调优与架构设计.pdf
+
+>尽可能减少Nested Loop循环的总次数。
+
+有效办法比如：驱动表的的结果集尽可能小，即：永远使用小表驱动大表。
+
+>优化Nested Loop的内层循环。
+
+类似于在优化代码时候所做的事情。
+
+>保证Join语句中被驱动表上的字段已经被索引。
+
+可以说这是一种优化内存循环的办法
+
+>无法保证Join语句中被驱动表的字段有索引，并且在内存资源充足的情况下，不要吝啬Join Buffer参数。
+
