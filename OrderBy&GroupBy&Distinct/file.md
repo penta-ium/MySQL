@@ -50,8 +50,12 @@ MySQL从一个表取了结果之后，又按照排序字段进行了一次fileso
 ##分类
 ###松散型索引分组
 ![looseindex](./png/loosegroup.jpg)
+
+只需要扫描部分满足条件的索引项目
 ###紧凑型索引分组
 ![tghtindex](./png/tightgroup.jpg)
+
+需要扫描全部的满足条件的索引项目
 ###无索引走临时表
 ![noindex](./png/temptablegroup.jpg)
 当MySQL Query Optimizer发现仅仅通过索引扫描并不能直接得到GROUP BY的结果之后，他就不得不选择通过使用临时表然后再排序的方式来实现GROUP BY了。
